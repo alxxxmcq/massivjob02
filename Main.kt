@@ -1,88 +1,79 @@
 fun main() {
-    // Запрашиваем количество строк и столбцов
-    print("Введите количество строк: ")
-    val rows = readLine()?.toIntOrNull() ?: 0
+    // Тестовые случаи
+    val symmetricMatrix = arrayOf(
+        intArrayOf(5, 9, 6, 7, 2),
+        intArrayOf(9, 8, 4, 5, 3),
+        intArrayOf(6, 4, 3, 8, 7),
+        intArrayOf(7, 5, 8, 4, 8),
+        intArrayOf(2, 3, 7, 8, 1)
+    )
 
-    print("Введите количество столбцов: ")
-    val cols = readLine()?.toIntOrNull() ?: 0
+    val nonSymmetricMatrix = arrayOf(
+        intArrayOf(1, 2, 3),
+        intArrayOf(4, 5, 6),
+        intArrayOf(7, 8, 9)
+    )
 
-    if (rows <= 0 || cols <= 0) {
-        println("Некорректные размеры массива")
-        return
-    }
+    println("Тест 1 - Симметричная матрица:")
+    testMatrix(symmetricMatrix)
 
-    // Создаем двумерный массив
-    val matrix = Array(rows) { IntArray(cols) }
+    println("\nТест 2 - Несимметричная матрица:")
+    testMatrix(nonSymmetricMatrix)
 
-    println("\nВведите $rows строк по $cols трехзначных чисел:")
+    // Интерактивный тест
+    println("\n" + "=".repeat(40))
+    interactiveTest()
+}
 
-    // Заполняем массив числами
-    for (i in 0 until rows) {
-        var validInput = false
-        while (!validInput) {
+fun testMatrix(matrix: Array<IntArray>) {
+    println("Матрица:")
+    printMatrix(matrix)
+
+    val isSymmetric = isMatrixSymmetric(matrix)
+    println("Симметрична: $isSymmetric")
+}
+
+fun interactiveTest() {
+    println("ИНТЕРАКТИВНЫЙ ТЕСТ")
+    println("Введите размер квадратной матрицы: ")
+    val size = readLine()?.toIntOrNull() ?: 3
+
+    println("Введите матрицу $size x $size:")
+    val matrix = Array(size) { IntArray(size) }
+
+    for (i in 0 until size) {
+        var valid = false
+        while (!valid) {
             print("Строка ${i + 1}: ")
-            val input = readLine()
-            val numbers = input?.split("\\s+".toRegex()) ?: emptyList()
-
-            if (numbers.size == cols) {
-                var allValid = true
-                for (j in 0 until cols) {
-                    val num = numbers[j].toIntOrNull()
-                    if (num == null || num < 100 || num > 999) {
-                        println("Ошибка: '$num' не является трехзначным числом")
-                        allValid = false
-                        break
-                    }
-                    matrix[i][j] = num
-                }
-                if (allValid) {
-                    validInput = true
-                }
+            val row = readLine()?.split(" ")?.mapNotNull { it.toIntOrNull() }
+            if (row != null && row.size == size) {
+                matrix[i] = row.toIntArray()
+                valid = true
             } else {
-                println("Ошибка: введено ${numbers.size} чисел вместо $cols")
+                println("Ошибка! Введите $size чисел через пробел")
             }
         }
     }
 
-    // Подсчитываем количество различных цифр
-    val uniqueDigits = countUniqueDigits(matrix)
-
-    // Выводим массив
-    println("\nДвумерный массив:")
+    println("\nВаша матрица:")
     printMatrix(matrix)
 
-    // Выводим результат
-    println("\nВ массиве использовано ${uniqueDigits.size} различных цифр")
-    println("Использованные цифры: ${uniqueDigits.sorted().joinToString(", ")}")
+    val result = isMatrixSymmetric(matrix)
+    println("\nРезультат: матрица ${if (result) "симметрична" else "не симметрична"} относительно главной диагонали")
+}
+
+// Функция проверки симметричности (компактная версия)
+fun isMatrixSymmetric(matrix: Array<IntArray>): Boolean {
+    for (i in matrix.indices) {
+        for (j in i + 1 until matrix.size) {
+            if (matrix[i][j] != matrix[j][i]) return false
+        }
+    }
+    return true
 }
 
 fun printMatrix(matrix: Array<IntArray>) {
-    for (i in matrix.indices) {
-        for (j in matrix[i].indices) {
-            print("${matrix[i][j]}\t")
-        }
-        println()
+    for (row in matrix) {
+        println(row.joinToString("\t"))
     }
-}
-
-fun countUniqueDigits(matrix: Array<IntArray>): Set<Int> {
-    val uniqueDigits = mutableSetOf<Int>()
-
-    for (i in matrix.indices) {
-        for (j in matrix[i].indices) {
-            val number = matrix[i][j]
-
-            // Разбиваем трехзначное число на цифры
-            val hundreds = number / 100
-            val tens = (number % 100) / 10
-            val units = number % 10
-
-            // Добавляем цифры в множество
-            uniqueDigits.add(hundreds)
-            uniqueDigits.add(tens)
-            uniqueDigits.add(units)
-        }
-    }
-
-    return uniqueDigits
 }
